@@ -2,10 +2,10 @@ Database:  evoting_db
 Host:      localhost
 Port:      5432
 User:      evoting_user
-Password:  evoting1234
+Password:  amaka.vm
 
 --- Node.js connection string ---
-postgresql://evoting_user:evoting1234@localhost:5432/evoting_db
+postgresql://evoting_user:amaka.vm@localhost:5432/evoting_db
 
 --- Python connection string ---
-postgresql+psycopg2://evoting_user:evoting1234@localhost:5432/evoting_db
+postgresql+psycopg2://evoting_user:amaka.vm@localhost:5432/evoting_db
