@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUCI | Secure Student E-Voting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+        <div class="flex items-center gap-2">
+            <i data-lucide="vote" class="w-8 h-8 text-blue-600"></i>
+            <span class="text-2xl font-bold text-slate-800 tracking-tight">GUCI</span>
+        </div>
+        <div class="flex gap-4">
+            <a href="login.html" class="px-4 py-2 text-slate-600 font-medium hover:text-blue-600 transition-colors">Log In</a>
+            <a href="login.html" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm">Start Voting</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main class="flex-1 max-w-6xl mx-auto px-6 py-16 flex flex-col items-center text-center">
+        <div class="mb-6 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-medium">
+            <i data-lucide="shield" class="w-4 h-4"></i>
+            Secure & Transparent Student Voting
+        </div>
+        <h1 class="text-5xl md:text-6xl font-extrabold text-slate-900 mb-6 leading-tight">
+            Next-Generation E-Voting <br />
+            <span class="text-blue-600">for Modern Students</span>
+        </h1>
+        <p class="text-xl text-slate-600 mb-10 max-w-2xl leading-relaxed">
+            GUCI provides a secure, anonymous, and easy-to-use platform for student elections. 
+            Powered by biometric security and real-time analytics.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 mb-20">
+            <a href="login.html" class="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl active:scale-95">
+                Student Access
+            </a>
+            <a href="login.html" class="px-8 py-4 bg-white text-slate-800 border-2 border-slate-200 rounded-xl font-bold text-lg hover:border-blue-200 hover:bg-slate-50 transition-all active:scale-95">
+                Admin Portal
+            </a>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8 w-full">
+            <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
+                    <i data-lucide="shield" class="w-6 h-6 text-blue-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-3">Secure & Anonymous</h3>
+                <p class="text-slate-600">Advanced hashing ensures your vote remains private while preventing double-voting.</p>
+            </div>
+            <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
+                    <i data-lucide="bar-chart-3" class="w-6 h-6 text-green-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-3">Live Analytics</h3>
+                <p class="text-slate-600">Real-time turnout tracking and beautiful result visualizations post-election.</p>
+            </div>
+            <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
+                    <i data-lucide="users" class="w-6 h-6 text-purple-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-3">Biometric Auth</h3>
+                <p class="text-slate-600">Integrated face recognition option to ensure only authorized students can vote.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

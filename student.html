@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | GUCI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen bg-slate-50 flex font-sans">
+    <aside class="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col">
+        <div class="p-6 border-b border-slate-100 flex items-center gap-2">
+            <i data-lucide="vote" class="w-6 h-6 text-blue-600"></i>
+            <span class="font-bold text-xl text-slate-800">GUCI</span>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="student.html" class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-xl font-medium">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+            </a>
+        </nav>
+        <div class="p-4 mt-auto border-t border-slate-100">
+            <a href="index.html" class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-10 max-w-5xl">
+        <header class="mb-10">
+            <h1 class="text-3xl font-extrabold text-slate-900">Student Dashboard</h1>
+            <p class="text-slate-500 mt-1">Welcome back, Student #202100456</p>
+        </header>
+
+        <section class="mb-12">
+            <div class="flex items-center gap-2 mb-6">
+                <i data-lucide="clock" class="w-5 h-5 text-blue-600"></i>
+                <h2 class="text-xl font-bold text-slate-800">Active Elections</h2>
+            </div>
+            <div class="space-y-4">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 mb-1">Student Union President 2025</h3>
+                        <p class="text-sm text-slate-500">Ends Jun 15, 6:00 PM • 4 Candidates</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="px-4 py-2 bg-amber-50 text-amber-700 rounded-full text-sm font-bold border border-amber-100">Pending</span>
+                        <a href="vote.html" class="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700">Cast Vote</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
