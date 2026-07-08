@@ -23,10 +23,14 @@ router.post('/login', async (req, res) => {
         return res.status(401).json({ error: 'Fingerprint verification failed' });
     }
 
-    await db.query(
-      'INSERT INTO audit_log (action_type, performer_id, details) VALUES ($1, $2, $3)',
-      ['USER_LOGIN', user.id, `User ${user.student_id} logged in`]
-    );
+    try {
+        await db.query(
+          'INSERT INTO audit_log (action_type, performer_id, details) VALUES ($1, $2, $3)',
+          ['USER_LOGIN', user.id, `User ${user.student_id} logged in`]
+        );
+    } catch (auditErr) {
+        console.error('Audit log failed:', auditErr.message);
+    }
 
     const token = jwt.sign(
       { id: user.id, role: user.role, name: user.name, studentId: user.student_id },
@@ -36,7 +40,8 @@ router.post('/login', async (req, res) => {
 
     res.json({ token, user: { id: user.id, name: user.name, role: user.role } });
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Server error: ' + err.message });
   }
 });
 

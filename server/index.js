@@ -18,7 +18,10 @@ app.use('/api/votes', require('./routes/votes'));
 app.use('/api/results', require('./routes/results'));
 app.use('/api/audit', require('./routes/audit'));
 
-app.get('*', (req, res) => { res.sendFile(path.join(__dirname, '../public/index.html')); });
+// Final fallback to index.html for all other routes
+app.use((req, res) => {
+    res.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => { console.log(`Server running on port ${PORT}`); });
