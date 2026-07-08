@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results | GUCI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="min-h-screen bg-slate-50 font-sans">
+    <header class="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <button onclick="goBack()" class="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                    <i data-lucide="chevron-left" class="w-6 h-6 text-slate-600"></i>
+                </button>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900">Election Results</h1>
+                    <p id="election-subtitle" class="text-xs text-slate-500 font-medium">Official Tally</p>
+                </div>
+            </div>
+            <button onclick="window.print()" class="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-50 shadow-sm">
+                <i data-lucide="download" class="w-4 h-4"></i> Export PDF
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-8">
+        <div id="winner-banner" class="hidden bg-blue-600 rounded-3xl p-8 text-white mb-8 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+            <div class="relative z-10">
+                <div class="flex items-center gap-2 mb-4">
+                    <i data-lucide="award" class="w-6 h-6 text-amber-400"></i>
+                    <span class="font-bold tracking-widest uppercase text-xs text-blue-100">Leading Candidate</span>
+                </div>
+                <h2 id="winner-name" class="text-4xl font-black mb-2">---</h2>
+                <p id="winner-stats" class="text-blue-100 text-lg">---</p>
+            </div>
+            <div class="relative z-10 flex gap-4">
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 text-center">
+                    <p class="text-blue-100 text-xs font-bold uppercase mb-1">Total Ballots</p>
+                    <p id="total-ballots" class="text-2xl font-bold">0</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 text-center">
+                    <p class="text-blue-100 text-xs font-bold uppercase mb-1">Turnout</p>
+                    <p id="turnout-perc" class="text-2xl font-bold">0%</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-8">Vote Distribution</h3>
+                <div id="chart-container"><canvas id="votesChart"></canvas></div>
+            </div>
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-6">Participation</h3>
+                <div class="relative aspect-square"><canvas id="participationChart"></canvas></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        const urlParams = new URLSearchParams(window.location.search);
+        const electionId = urlParams.get('id');
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (!token || !electionId) {
+            window.location.href = 'login.html';
+        }
+
+        function goBack() {
+            window.location.href = user.role === 'student' ? 'student.html' : 'admin.html';
+        }
+
+        async function loadResults() {
+            try {
+                const response = await fetch(`/api/results/${electionId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert(data.error);
+                    goBack();
+                    return;
+                }
+
+                document.getElementById('election-subtitle').textContent = `${data.election.title} • Official Tally`;
+
+                const totalVotes = parseInt(data.turnout.cast_votes);
+                const totalStudents = parseInt(data.turnout.total_students);
+                const turnout = totalStudents > 0 ? ((totalVotes / totalStudents) * 100).toFixed(1) : 0;
+
+                document.getElementById('total-ballots').textContent = totalVotes.toLocaleString();
+                document.getElementById('turnout-perc').textContent = `${turnout}%`;
+
+                if (data.votes.length > 0) {
+                    document.getElementById('winner-banner').classList.remove('hidden');
+                    const winner = data.votes[0];
+                    document.getElementById('winner-name').textContent = winner.name;
+                    const winnerPerc = totalVotes > 0 ? ((parseInt(winner.votes) / totalVotes) * 100).toFixed(1) : 0;
+                    document.getElementById('winner-stats').innerHTML = `Currently leading with <span class="font-bold text-white">${winner.votes} votes</span> (${winnerPerc}%)`;
+
+                    renderCharts(data.votes, totalVotes, totalStudents);
+                }
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderCharts(voteData, totalVotes, totalStudents) {
+            new Chart(document.getElementById('votesChart'), {
+                type: 'bar',
+                data: {
+                    labels: voteData.map(v => v.name),
+                    datasets: [{
+                        label: 'Votes',
+                        data: voteData.map(v => v.votes),
+                        backgroundColor: ['#2563eb', '#7c3aed', '#db2777', '#ea580c', '#16a34a'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+                }
+            });
+
+            new Chart(document.getElementById('participationChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Voted', 'Not Voted'],
+                    datasets: [{
+                        data: [totalVotes, totalStudents - totalVotes],
+                        backgroundColor: ['#10b981', '#e2e8f0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { cutout: '70%' }
+            });
+        }
+
+        loadResults();
+    </script>
+</body>
+</html>

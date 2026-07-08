@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | GUCI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen bg-slate-50 flex font-sans">
+    <aside class="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col">
+        <div class="p-6 border-b border-slate-100 flex items-center gap-2">
+            <i data-lucide="vote" class="w-6 h-6 text-blue-600"></i>
+            <span class="font-bold text-xl text-slate-800">GUCI</span>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="student.html" class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-xl font-medium">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+            </a>
+        </nav>
+        <div class="p-4 mt-auto border-t border-slate-100">
+            <button id="logout-btn" class="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-10 max-w-5xl">
+        <header class="mb-10">
+            <h1 class="text-3xl font-extrabold text-slate-900">Student Dashboard</h1>
+            <p id="welcome-msg" class="text-slate-500 mt-1">Welcome back</p>
+        </header>
+
+        <section class="mb-12">
+            <div class="flex items-center gap-2 mb-6">
+                <i data-lucide="clock" class="w-5 h-5 text-blue-600"></i>
+                <h2 class="text-xl font-bold text-slate-800">Available Elections</h2>
+            </div>
+            <div id="elections-list" class="space-y-4">
+                <div class="flex justify-center p-8"><i data-lucide="loader-2" class="w-8 h-8 animate-spin text-blue-600"></i></div>
+            </div>
+        </section>
+    </main>
+    <script>
+        lucide.createIcons();
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!token || user?.role !== 'student') window.location.href = 'login.html';
+
+        document.getElementById('welcome-msg').textContent = `Welcome back, ${user.name}`;
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        });
+
+        async function fetchElections() {
+            try {
+                const response = await fetch('/api/elections', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const elections = await response.json();
+                const list = document.getElementById('elections-list');
+                list.innerHTML = '';
+
+                if (elections.length === 0) {
+                    list.innerHTML = '<p class="text-slate-500 italic">No elections at the moment.</p>';
+                    return;
+                }
+
+                elections.forEach(election => {
+                    const isActive = election.status === 'active';
+                    const isPublished = election.status === 'published';
+                    const card = document.createElement('div');
+                    card.className = `bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center ${(!isActive && !isPublished) ? 'opacity-75' : ''}`;
+
+                    let actionHtml = '';
+                    if (isActive) {
+                        actionHtml = `<a href="vote.html?id=${election.id}" class="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700">Cast Vote</a>`;
+                    } else if (isPublished) {
+                        actionHtml = `<a href="results.html?id=${election.id}" class="px-6 py-2 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700">View Results</a>`;
+                    } else {
+                        actionHtml = `<span class="px-6 py-2 bg-slate-100 text-slate-400 rounded-xl font-bold text-sm">Not Available</span>`;
+                    }
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <h3 class="text-lg font-bold text-slate-900">${election.title}</h3>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase ${isActive?'bg-green-100 text-green-700':(isPublished?'bg-blue-100 text-blue-700':'bg-slate-100 text-slate-500')}">${election.status}</span>
+                            </div>
+                            <p class="text-sm text-slate-500">${isPublished ? 'Election Ended' : `Ends ${new Date(election.end_date).toLocaleString()}`}</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            ${actionHtml}
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        fetchElections();
+    </script>
+</body>
+</html>
