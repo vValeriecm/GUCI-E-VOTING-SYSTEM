@@ -79,10 +79,7 @@
         const errorMsg = document.getElementById('error-msg');
         const submitBtn = document.getElementById('submit-btn');
 
-        let currentBio = null;
-
         faceIdBtn.addEventListener('click', async () => {
-            currentBio = 'face';
             pwLogin.classList.add('hidden');
             bioLogin.classList.remove('hidden');
             document.getElementById('face-view').classList.remove('hidden');
@@ -97,7 +94,6 @@
         });
 
         fingerprintBtn.addEventListener('click', () => {
-            currentBio = 'finger';
             pwLogin.classList.add('hidden');
             bioLogin.classList.remove('hidden');
             document.getElementById('finger-view').classList.remove('hidden');
