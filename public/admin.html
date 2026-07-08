@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | GUCI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen bg-slate-50 flex font-sans">
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col">
+        <div class="p-6 border-b border-slate-800 flex items-center gap-2">
+            <i data-lucide="vote" class="w-8 h-8 text-blue-500"></i>
+            <span class="text-2xl font-bold text-white">GUCI</span>
+        </div>
+        <nav class="p-4 space-y-1">
+            <a href="admin.html" class="flex items-center gap-3 px-4 py-3 bg-blue-600 text-white rounded-xl font-medium">
+                <i data-lucide="activity" class="w-5 h-5"></i> Dashboard
+            </a>
+            <a href="audit.html" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-800 rounded-xl">
+                <i data-lucide="file-text" class="w-5 h-5"></i> Audit Logs
+            </a>
+            <button id="logout-btn" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-800 rounded-xl text-left">
+                <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+            </button>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-10">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-extrabold text-slate-900">Admin Control Center</h2>
+            <button onclick="toggleModal('election-modal')" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-700">
+                <i data-lucide="plus" class="w-5 h-5"></i> Create Election
+            </button>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 border-b"><tr class="text-xs font-bold text-slate-400 uppercase">
+                    <th class="px-6 py-4">Election Name</th>
+                    <th class="px-6 py-4">Status</th>
+                    <th class="px-6 py-4 text-right">Actions</th>
+                </tr></thead>
+                <tbody id="elections-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Election Modal -->
+        <div id="election-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div class="bg-white p-8 rounded-3xl w-full max-w-lg shadow-2xl">
+                <h3 class="text-2xl font-bold mb-6">Create New Election</h3>
+                <form id="election-form" class="space-y-4">
+                    <div><label class="block text-sm font-medium mb-1">Title</label><input type="text" id="el-title" required class="w-full p-3 bg-slate-50 border rounded-xl"></div>
+                    <div><label class="block text-sm font-medium mb-1">Description</label><textarea id="el-desc" class="w-full p-3 bg-slate-50 border rounded-xl"></textarea></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-medium mb-1">Start Date</label><input type="datetime-local" id="el-start" required class="w-full p-3 bg-slate-50 border rounded-xl"></div>
+                        <div><label class="block text-sm font-medium mb-1">End Date</label><input type="datetime-local" id="el-end" required class="w-full p-3 bg-slate-50 border rounded-xl"></div>
+                    </div>
+                    <div class="flex gap-4 pt-4">
+                        <button type="button" onclick="toggleModal('election-modal')" class="flex-1 py-3 bg-slate-100 rounded-xl font-bold">Cancel</button>
+                        <button type="submit" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold">Save Election</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Candidate Modal -->
+        <div id="candidate-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div class="bg-white p-8 rounded-3xl w-full max-w-lg shadow-2xl">
+                <h3 class="text-2xl font-bold mb-6">Add Candidate</h3>
+                <form id="candidate-form" class="space-y-4">
+                    <input type="hidden" id="cand-election-id">
+                    <div><label class="block text-sm font-medium mb-1">Name</label><input type="text" id="cand-name" required class="w-full p-3 bg-slate-50 border rounded-xl"></div>
+                    <div><label class="block text-sm font-medium mb-1">Position</label><input type="text" id="cand-pos" required class="w-full p-3 bg-slate-50 border rounded-xl"></div>
+                    <div><label class="block text-sm font-medium mb-1">Manifesto</label><textarea id="cand-manifesto" class="w-full p-3 bg-slate-50 border rounded-xl"></textarea></div>
+                    <div class="flex gap-4 pt-4">
+                        <button type="button" onclick="toggleModal('candidate-modal')" class="flex-1 py-3 bg-slate-100 rounded-xl font-bold">Cancel</button>
+                        <button type="submit" class="flex-1 py-3 bg-green-600 text-white rounded-xl font-bold">Add Candidate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!token || user?.role === 'student') window.location.href = 'login.html';
+
+        function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
+
+        async function api(path, method = 'GET', body = null) {
+            const res = await fetch(path, {
+                method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: body ? JSON.stringify(body) : null
+            });
+            return res.json();
+        }
+
+        async function loadElections() {
+            const elections = await api('/api/elections');
+            const body = document.getElementById('elections-body');
+            body.innerHTML = '';
+            elections.forEach(e => {
+                const row = document.createElement('tr');
+                row.className = 'border-b hover:bg-slate-50';
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-bold">${e.title}</td>
+                    <td class="px-6 py-4">
+                        <select onchange="updateStatus('${e.id}', this.value)" class="bg-slate-100 rounded-lg px-2 py-1 text-sm font-bold">
+                            <option value="upcoming" ${e.status==='upcoming'?'selected':''}>UPCOMING</option>
+                            <option value="active" ${e.status==='active'?'selected':''}>ACTIVE</option>
+                            <option value="closed" ${e.status==='closed'?'selected':''}>CLOSED</option>
+                            <option value="published" ${e.status==='published'?'selected':''}>PUBLISHED</option>
+                        </select>
+                    </td>
+                    <td class="px-6 py-4 text-right flex justify-end gap-3">
+                        <button onclick="openCandidateModal('${e.id}')" class="text-green-600 font-bold flex items-center gap-1"><i data-lucide="user-plus" class="w-4 h-4"></i> Add Cand</button>
+                        <a href="results.html?id=${e.id}" class="text-blue-600 font-bold flex items-center gap-1"><i data-lucide="bar-chart" class="w-4 h-4"></i> Results</a>
+                        <button onclick="deleteElection('${e.id}')" class="text-red-600 font-bold flex items-center gap-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                `;
+                body.appendChild(row);
+            });
+            lucide.createIcons();
+        }
+
+        async function updateStatus(id, status) {
+            await api(`/api/elections/${id}/status`, 'PATCH', { status });
+            alert("Status updated: Students can now " + (status === 'published' ? 'view results' : (status === 'active' ? 'vote' : 'wait')));
+        }
+
+        async function deleteElection(id) {
+            if(confirm("Delete election?")) { await api(`/api/elections/${id}`, 'DELETE'); loadElections(); }
+        }
+
+        document.getElementById('election-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await api('/api/elections', 'POST', {
+                title: document.getElementById('el-title').value,
+                description: document.getElementById('el-desc').value,
+                start_date: document.getElementById('el-start').value,
+                end_date: document.getElementById('el-end').value,
+                eligibility_rules: { departments: 'all' }
+            });
+            toggleModal('election-modal');
+            loadElections();
+        });
+
+        function openCandidateModal(id) {
+            document.getElementById('cand-election-id').value = id;
+            toggleModal('candidate-modal');
+        }
+
+        document.getElementById('candidate-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await api('/api/candidates', 'POST', {
+                election_id: document.getElementById('cand-election-id').value,
+                name: document.getElementById('cand-name').value,
+                position: document.getElementById('cand-pos').value,
+                manifesto: document.getElementById('cand-manifesto').value
+            });
+            toggleModal('candidate-modal');
+            alert("Candidate added");
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => { localStorage.clear(); window.location.href='index.html'; });
+
+        loadElections();
+    </script>
+</body>
+</html>
